@@ -1,1 +1,1 @@
-# SweeLabs-Homepage
+# SweetLabs-Homepage
