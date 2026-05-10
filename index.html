@@ -640,12 +640,86 @@
     letter-spacing: 0.02em;
   }
 
-  .contact-email-line .email {
+  .email-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    padding: 4px 10px;
+    margin: -4px -2px;
+    border-radius: 6px;
     color: var(--fg-dim);
     font-family: var(--display);
+    font-size: 13px;
     font-weight: 400;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+    position: relative;
+  }
+
+  .email-copy-btn:hover {
+    color: var(--fg);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .email-copy-btn .email-copy-text {
     border-bottom: 1px dashed var(--line);
     padding-bottom: 1px;
+    transition: border-color 0.2s ease;
+  }
+
+  .email-copy-btn:hover .email-copy-text {
+    border-bottom-color: var(--fg-dim);
+  }
+
+  .email-copy-btn .email-copy-icon,
+  .email-copy-btn .email-copy-check {
+    flex-shrink: 0;
+    opacity: 0.55;
+    transition: opacity 0.2s ease;
+  }
+
+  .email-copy-btn:hover .email-copy-icon {
+    opacity: 1;
+  }
+
+  .email-copy-btn .email-copy-check {
+    display: none;
+    color: #86efac;
+    opacity: 1;
+  }
+
+  .email-copy-btn.copied .email-copy-icon {
+    display: none;
+  }
+
+  .email-copy-btn.copied .email-copy-check {
+    display: block;
+  }
+
+  .email-copy-tooltip {
+    position: absolute;
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--fg);
+    color: var(--bg);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .email-copy-btn.copied .email-copy-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 
   /* ====== FOOTER ====== */
@@ -943,7 +1017,18 @@
       <div class="form-status" id="form-status" aria-live="polite"></div>
     </form>
     <p class="contact-email-line reveal">
-      또는 메일로 직접: <span class="email">sales@sweetlabs.co.kr</span>
+      또는 메일로 직접:
+      <button type="button" class="email-copy-btn" id="email-copy-btn" aria-label="이메일 주소 복사">
+        <span class="email-copy-text">sales@sweetlabs.co.kr</span>
+        <svg class="email-copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <svg class="email-copy-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span class="email-copy-tooltip">Copied!</span>
+      </button>
     </p>
   </div>
 </section>
@@ -1047,6 +1132,32 @@
         cStatus.className = 'form-status error';
       } finally {
         submitBtn.disabled = false;
+      }
+    });
+  }
+
+  // Email copy button
+  const emailBtn = document.getElementById('email-copy-btn');
+  if (emailBtn) {
+    emailBtn.addEventListener('click', async () => {
+      const text = 'sales@sweetlabs.co.kr';
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        emailBtn.classList.add('copied');
+        setTimeout(() => emailBtn.classList.remove('copied'), 2000);
+      } catch (err) {
+        console.error('Copy failed:', err);
       }
     });
   }
